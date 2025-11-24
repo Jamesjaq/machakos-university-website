@@ -23,7 +23,7 @@ A stunning, modern redesign of Machakos University's website featuring 3D animat
 
 1. Clone this repository
 2. Open `index.html` in your browser
-
+3. Or vistit : https://jamesjaq.github.io/machakos-university-website/
 ## 📞 Contact
 jimmysipenji@gmail.com
 
