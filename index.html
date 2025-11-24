@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machakos University - Excellence in Education</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a237e;
+            --secondary: #ff9800;
+            --accent: #4caf50;
+            --light: #f5f5f5;
+            --dark: #212121;
+        }
+
+        body {
+            background-color: #0a0a1a;
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        /* Custom Cursor Styles */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 152, 0, 0.7);
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-follower {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 152, 0, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transition: all 0.3s ease-out;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Rest of your CSS remains the same */
+        #video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            opacity: 0.3;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        header {
+            background: rgba(10, 10, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo img {
+            height: 60px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(to right, #ff9800, #ff5722);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(255, 152, 0, 0.5);
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .quick-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .quick-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            background: rgba(255, 152, 0, 0.1);
+        }
+
+        .quick-links a:hover {
+            color: var(--secondary);
+            background: rgba(255, 152, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        nav a:hover {
+            color: var(--secondary);
+            background: rgba(255, 152, 0, 0.1);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--secondary);
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+
+        nav a:hover::after {
+            width: 80%;
+        }
+
+        .page-content {
+            display: none;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .active-page {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero {
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(10, 10, 26, 0.8) 70%);
+            z-index: -1;
+        }
+
+        .hero h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            background: linear-gradient(to right, #ff9800, #ff5722, #e91e63);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: glow 3s infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px rgba(255, 152, 0, 0.5); }
+            100% { text-shadow: 0 0 20px rgba(255, 87, 34, 0.8), 0 0 30px rgba(233, 30, 99, 0.6); }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--secondary), #ff5722);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--light);
+            border: 2px solid var(--secondary);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.6);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 152, 0, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 152, 0, 0.2);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .section {
+            padding: 5rem 2rem;
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #4caf50, #2196f3);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, #4caf50, #2196f3);
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card i {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .news-section {
+            background: rgba(10, 10, 26, 0.7);
+        }
+
+        .news-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .news-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .news-img {
+            height: 200px;
+            background: linear-gradient(45deg, #1a237e, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .news-content {
+            padding: 1.5rem;
+        }
+
+        .news-content h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .news-content p {
+            color: #ccc;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .read-more {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .read-more:hover {
+            color: #ff5722;
+            transform: translateX(5px);
+        }
+
+        .read-more i {
+            transition: transform 0.3s;
+        }
+
+        .read-more:hover i {
+            transform: translateX(5px);
+        }
+
+        footer {
+            background: rgba(5, 5, 15, 0.95);
+            padding: 3rem 2rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-column a {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: var(--secondary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(20, 20, 40, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 30px rgba(255, 152, 0, 0.3);
+            position: relative;
+            animation: modalAppear 0.5s;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--secondary);
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, var(--secondary), #ff5722);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        /* Page-specific styles */
+        .page-hero {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #ff9800, #ff5722, #e91e63);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: glow 3s infinite alternate;
+        }
+
+        .page-hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .programs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .program-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .program-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+        }
+
+        .program-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .program-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .program-card p {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .faculty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .faculty-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .faculty-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .faculty-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(45deg, #1a237e, #4caf50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        .faculty-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .faculty-card p {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+        }
+
+        .contact-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-item i {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            margin-top: 0.2rem;
+        }
+
+        .contact-form {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+        }
+
+        .contact-form h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .hero h2, .page-hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .quick-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* RSS Loading Animation */
+        .loading-news {
+            text-align: center;
+            padding: 2rem;
+            grid-column: 1 / -1;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .news-date {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .news-category {
+            display: inline-block;
+            background: rgba(255, 152, 0, 0.2);
+            color: var(--secondary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .portal-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+        }
+
+        .portal-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .portal-card i {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .portal-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .portal-card p {
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+
+        .external-link {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--secondary), #ff5722);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .external-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .real-content-badge {
+            background: linear-gradient(45deg, #4caf50, #2196f3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom cursor -->
+    <div class="custom-cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Background video -->
+    <video id="video-bg" autoplay muted loop>
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-background-with-moving-lines-1765-large.mp4" type="video/mp4">
+    </video>
+
+    <!-- Three.js container -->
+    <div id="canvas-container"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="top-bar">
+            <div class="logo">
+                <div class="logo-img">
+                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                        <circle cx="30" cy="30" r="28" stroke="#ff9800" stroke-width="2"/>
+                        <path d="M30 10 L40 25 L35 40 L25 40 L20 25 Z" fill="#1a237e"/>
+                        <circle cx="30" cy="30" r="8" fill="#ff9800"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>MACHAKOS UNIVERSITY</h1>
+                    <p>Excellence in Education and Innovation</p>
+                </div>
+            </div>
+            <div class="quick-links">
+                <a href="https://students.mksu.ac.ke/" class="quick-link" target="_blank"><i class="fas fa-sign-in-alt"></i> Student Portal</a>
+                <a href="https://staff.mksu.ac.ke/" class="quick-link" target="_blank"><i class="fas fa-user-tie"></i> Staff Portal</a>
+                <a href="https://elearning.mksu.ac.ke/" class="quick-link" target="_blank"><i class="fas fa-laptop-code"></i> E-Learning</a>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" class="nav-link active" data-page="home">Home</a></li>
+                <li><a href="#" class="nav-link" data-page="about">About</a></li>
+                <li><a href="#" class="nav-link" data-page="academics">Academics</a></li>
+                <li><a href="#" class="nav-link" data-page="admissions">Admissions</a></li>
+                <li><a href="#" class="nav-link" data-page="research">Research</a></li>
+                <li><a href="#" class="nav-link" data-page="portals">Portals</a></li>
+                <li><a href="#" class="nav-link" data-page="contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Home Page -->
+    <div id="home" class="page-content active-page">
+        <section class="hero">
+            <div class="floating-elements">
+                <!-- Floating elements will be added via JS -->
+            </div>
+            <h2>Welcome to Machakos University</h2>
+            <p>Where innovation meets excellence. We are committed to providing quality education, fostering research, and nurturing future leaders in a dynamic and inclusive environment.</p>
+            <div class="cta-buttons">
+                <a href="#" class="btn btn-primary" id="apply-now">Apply Now</a>
+                <a href="#" class="btn btn-secondary" data-page="academics">Explore Programs</a>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>Why Choose Machakos University?</h2>
+                <p>Discover what makes us a leading institution of higher learning</p>
+            </div>
+            <div class="cards-container">
+                <div class="card">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Quality Education</h3>
+                    <p>Our programs are designed to meet international standards and equip students with skills for the global market.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-flask"></i>
+                    <h3>Research Excellence</h3>
+                    <p>We foster a culture of innovation and research that addresses societal challenges and contributes to knowledge.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-users"></i>
+                    <h3>Inclusive Community</h3>
+                    <p>Our diverse and inclusive campus community provides a supportive environment for all students to thrive.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section news-section">
+            <div class="section-title">
+                <h2>Latest News & Events</h2>
+                <p>Stay updated with the latest happenings at our university</p>
+            </div>
+            <div id="news-container" class="news-container">
+                <div class="loading-news">
+                    <div class="loading-spinner"></div>
+                    <p>Loading latest news from Machakos University...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- About Page -->
+    <div id="about" class="page-content">
+        <section class="page-hero">
+            <h1>About Machakos University</h1>
+            <p>Learn about our history, vision, mission, and the leadership that guides our institution</p>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>Our History & Vision</h2>
+            </div>
+            <div class="cards-container">
+                <div class="card">
+                    <i class="fas fa-history"></i>
+                    <h3>Our History</h3>
+                    <p>Established in 2011 as a university college and chartered in 2016, Machakos University has grown to become a premier institution of higher learning in Kenya.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-eye"></i>
+                    <h3>Our Vision</h3>
+                    <p>To be a premier university for innovation and excellence in teaching, research, and community service.</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-bullseye"></i>
+                    <h3>Our Mission</h3>
+                    <p>To provide quality university education through innovative teaching, research, and community engagement.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>University Leadership</h2>
+            </div>
+            <div class="faculty-grid">
+                <div class="faculty-card">
+                    <div class="faculty-img">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>Prof. James M. Muthama</h3>
+                    <p>Vice Chancellor</p>
+                </div>
+                <div class="faculty-card">
+                    <div class="faculty-img">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3>Dr. Lucy W. Kivuti</h3>
+                    <p>Deputy Vice Chancellor (Academic)</p>
+                </div>
+                <div class="faculty-card">
+                    <div class="faculty-img">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <h3>Dr. Peter M. Mulwa</h3>
+                    <p>Deputy Vice Chancellor (Administration)</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Portals Page -->
+    <div id="portals" class="page-content">
+        <section class="page-hero">
+            <h1>University Portals</h1>
+            <p>Access all university systems and platforms through our integrated portals</p>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>Student Portals</h2>
+            </div>
+            <div class="portal-grid">
+                <div class="portal-card">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Student Portal</h3>
+                    <p>Access your academic records, course registration, fees statements, and examination results.</p>
+                    <a href="https://students.mksu.ac.ke/" class="external-link" target="_blank">Access Portal</a>
+                </div>
+                <div class="portal-card">
+                    <i class="fas fa-laptop-code"></i>
+                    <h3>E-Learning Portal</h3>
+                    <p>Access online courses, learning materials, assignments, and virtual classrooms.</p>
+                    <a href="https://elearning.mksu.ac.ke/" class="external-link" target="_blank">Access E-Learning</a>
+                </div>
+                <div class="portal-card">
+                    <i class="fas fa-book"></i>
+                    <h3>Digital Library</h3>
+                    <p>Access thousands of e-books, journals, research papers, and academic databases.</p>
+                    <a href="https://library.mksu.ac.ke/" class="external-link" target="_blank">Access Library</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-title">
+                <h2>Staff Portals</h2>
+            </div>
+            <div class="portal-grid">
+                <div class="portal-card">
+                    <i class="fas fa-user-tie"></i>
+                    <h3>Staff Portal</h3>
+                    <p>Access HR services, payroll, teaching materials, and administrative systems.</p>
+                    <a href="https://staff.mksu.ac.ke/" class="external-link" target="_blank">Access Portal</a>
+                </div>
+                <div class="portal-card">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <h3>LMS Portal</h3>
+                    <p>Learning Management System for course management and student engagement.</p>
+                    <a href="https://lms.mksu.ac.ke/" class="external-link" target="_blank">Access LMS</a>
+                </div>
+                <div class="portal-card">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Webmail</h3>
+                    <p>Access your university email account and communication systems.</p>
+                    <a href="https://webmail.mksu.ac.ke/" class="external-link" target="_blank">Access Webmail</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#" data-page="home">Home</a></li>
+                    <li><a href="#" data-page="about">About Us</a></li>
+                    <li><a href="#" data-page="academics">Academics</a></li>
+                    <li><a href="#" data-page="admissions">Admissions</a></li>
+                    <li><a href="#" data-page="research">Research</a></li>
+                    <li><a href="#" data-page="portals">Portals</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Contact Us</h3>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> P.O. Box 136 - 90100, Machakos, Kenya</li>
+                    <li><i class="fas fa-phone"></i> +254 20 200 3000</li>
+                    <li><i class="fas fa-envelope"></i> info@mksu.ac.ke</li>
+                    <li><i class="fas fa-clock"></i> Mon-Fri: 8:00 AM - 5:00 PM</li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://facebook.com/machakosuniversity" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://twitter.com/machakosuni" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com/machakosuniversity" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://linkedin.com/school/machakos-university" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://youtube.com/c/machakosuniversity" target="_blank"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 Machakos University. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // FIXED CURSOR CODE
+        document.addEventListener('DOMContentLoaded', function() {
+            const cursor = document.querySelector('.custom-cursor');
+            const cursorFollower = document.querySelector('.cursor-follower');
+
+            // Make sure cursor elements exist
+            if (!cursor || !cursorFollower) {
+                console.log('Cursor elements not found');
+                return;
+            }
+
+            // Move cursor with mouse
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                
+                cursorFollower.style.left = e.clientX + 'px';
+                cursorFollower.style.top = e.clientY + 'px';
+            });
+
+            // Cursor click effect
+            document.addEventListener('mousedown', () => {
+                cursor.style.transform = 'scale(0.8)';
+                cursorFollower.style.transform = 'scale(1.2)';
+            });
+
+            document.addEventListener('mouseup', () => {
+                cursor.style.transform = 'scale(1)';
+                cursorFollower.style.transform = 'scale(1)';
+            });
+
+            // Hover effects
+            const interactiveElements = document.querySelectorAll('a, button, .card, .news-card, .program-card, .faculty-card, .portal-card');
+            
+            interactiveElements.forEach(element => {
+                element.addEventListener('mouseenter', () => {
+                    cursor.style.transform = 'scale(1.5)';
+                    cursor.style.background = 'rgba(255, 152, 0, 0.9)';
+                    cursorFollower.style.transform = 'scale(1.5)';
+                });
+                
+                element.addEventListener('mouseleave', () => {
+                    cursor.style.transform = 'scale(1)';
+                    cursor.style.background = 'rgba(255, 152, 0, 0.7)';
+                    cursorFollower.style.transform = 'scale(1)';
+                });
+            });
+
+            // Hide cursor when leaving window
+            document.addEventListener('mouseleave', () => {
+                cursor.style.opacity = '0';
+                cursorFollower.style.opacity = '0';
+            });
+
+            document.addEventListener('mouseenter', () => {
+                cursor.style.opacity = '1';
+                cursorFollower.style.opacity = '1';
+            });
+        });
+
+        // REST OF YOUR CODE (RSS, navigation, etc.) continues here...
+        // REAL WORKING RSS FEED INTEGRATION
+        const RSS_FEED_URL = 'https://www.mksu.ac.ke/feed/';
+        
+        // Function to parse RSS XML
+        function parseRSS(xml) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, 'text/xml');
+            
+            const items = xmlDoc.querySelectorAll('item');
+            const newsItems = [];
+            
+            items.forEach(item => {
+                const title = item.querySelector('title')?.textContent || 'No Title';
+                const link = item.querySelector('link')?.textContent || '#';
+                const description = item.querySelector('description')?.textContent || '';
+                const content = item.querySelector('content\\:encoded')?.textContent || '';
+                const pubDate = item.querySelector('pubDate')?.textContent || '';
+                const category = item.querySelector('category')?.textContent || 'General';
+                
+                // Extract image from content if available
+                let imageUrl = null;
+                const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+                if (imgMatch) {
+                    imageUrl = imgMatch[1];
+                }
+                
+                newsItems.push({
+                    title,
+                    link,
+                    description: description.replace(/<[^>]*>/g, '').substring(0, 150) + '...',
+                    content,
+                    pubDate,
+                    category,
+                    imageUrl
+                });
+            });
+            
+            return newsItems;
+        }
+
+        // Function to format date
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                return 'Recent';
+            }
+        }
+
+        // Function to create news card HTML
+        function createNewsCard(newsItem) {
+            const imageContent = newsItem.imageUrl ? 
+                `<img src="${newsItem.imageUrl}" alt="${newsItem.title}" style="width:100%;height:100%;object-fit:cover;">` :
+                `<span>${newsItem.category}</span>`;
+            
+            return `
+                <div class="news-card">
+                    <div class="news-img">
+                        ${imageContent}
+                        <div class="real-content-badge">LIVE</div>
+                    </div>
+                    <div class="news-content">
+                        <div class="news-category">${newsItem.category}</div>
+                        <span class="news-date">${formatDate(newsItem.pubDate)}</span>
+                        <h3>${newsItem.title}</h3>
+                        <p>${newsItem.description}</p>
+                        <a href="${newsItem.link}" class="read-more" target="_blank">
+                            Read Full Story <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Function to load and display RSS feed
+        async function loadRSSFeed() {
+            const container = document.getElementById('news-container');
+            
+            try {
+                // Using CORS proxy to avoid issues
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const response = await fetch(proxyUrl + encodeURIComponent(RSS_FEED_URL));
+                
+                if (!response.ok) throw new Error('Failed to fetch RSS feed');
+                
+                const xmlText = await response.text();
+                const newsItems = parseRSS(xmlText);
+                
+                // Display first 6 news items
+                const displayItems = newsItems.slice(0, 6);
+                container.innerHTML = displayItems.map(item => createNewsCard(item)).join('');
+                
+            } catch (error) {
+                console.error('Error loading RSS:', error);
+                container.innerHTML = `
+                    <div class="news-card">
+                        <div class="news-content">
+                            <h3>Latest University News</h3>
+                            <p>Visit the official Machakos University website for the most current news and announcements.</p>
+                            <a href="https://www.mksu.ac.ke" class="read-more" target="_blank">
+                                Visit Official Site <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Page Navigation System
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set home as active page initially
+            showPage('home');
+            
+            // Load real RSS feeds
+            loadRSSFeed();
+            
+            // Add event listeners to all navigation links
+            document.querySelectorAll('.nav-link, .quick-link, .btn[data-page]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('data-page');
+                    if (page) {
+                        showPage(page);
+                        
+                        // Update active nav link
+                        document.querySelectorAll('.nav-link').forEach(nav => {
+                            nav.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                    }
+                });
+            });
+            
+            // Function to show a specific page
+            function showPage(pageId) {
+                // Hide all pages
+                document.querySelectorAll('.page-content').forEach(page => {
+                    page.classList.remove('active-page');
+                });
+                
+                // Show the selected page
+                document.getElementById(pageId).classList.add('active-page');
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+            }
+        });
+
+        // Three.js background (simplified)
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        if (document.getElementById('canvas-container')) {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 1500;
+            const posArray = new Float32Array(particlesCount * 3);
+            
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 10;
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMaterial = new THREE.PointsMaterial({ size: 0.005, color: 0xffffff });
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            camera.position.z = 3;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                particlesMesh.rotation.x += 0.0005;
+                particlesMesh.rotation.y += 0.001;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // Create floating elements
+        const floatingContainer = document.querySelector('.floating-elements');
+        if (floatingContainer) {
+            for (let i = 0; i < 15; i++) {
+                const element = document.createElement('div');
+                element.classList.add('floating-element');
+                element.style.left = `${Math.random() * 100}%`;
+                element.style.animationDelay = `${Math.random() * 15}s`;
+                element.style.animationDuration = `${15 + Math.random() * 10}s`;
+                element.style.width = `${20 + Math.random() * 30}px`;
+                element.style.height = element.style.width;
+                floatingContainer.appendChild(element);
+            }
+        }
+    </script>
+</body>
+</html>
